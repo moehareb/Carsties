@@ -25,7 +25,7 @@ public class DbInitiazer
 
         var items = await httpClient.GetItemsForSearchDb();
 
-        Console.WriteLine(items.Count + "return from Auction Service");
+        Console.WriteLine(items.Count + " return from Auction Service");
 
         if (items.Count > 0) await DB.SaveAsync(items);
     }
