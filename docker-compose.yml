@@ -50,7 +50,7 @@ services:
       - ConnectionStrings__MongoDbConnection=mongodb://root:mongopw@mongodb
       - ConnectionStrings__DefaultConnection=Server=postgres:5432;User Id=postgres;Password=postgrespw;Database=search
       - AuctionServiceUrl=http://auction-svc
-      - UseMongoDb=True
+      - UseMongoDb=False
     ports:
       - 7002:80
     depends_on:

@@ -77,7 +77,8 @@ public class SearchController : ControllerBase
             if (!string.IsNullOrEmpty(searchParams.SearchTerm))
             {
                 // query = query.Where(x => EF.Functions.ILike(x.Make, $"%{searchParams.SearchTerm}%"));
-                query = query.Where(x => x.Make.Equals(searchParams.SearchTerm));
+                query = query.Where(x => x.Make.Equals(searchParams.SearchTerm) || x.Color.Equals(searchParams.SearchTerm)
+                || x.Model.Equals(searchParams.SearchTerm) || x.Year.Equals(searchParams.SearchTerm));
             }
 
             query = searchParams.OrderBy switch
