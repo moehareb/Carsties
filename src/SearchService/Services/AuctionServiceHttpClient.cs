@@ -1,4 +1,5 @@
-﻿using MongoDB.Entities;
+﻿using Microsoft.EntityFrameworkCore;
+using MongoDB.Entities;
 using SearchService.Models;
 
 namespace SearchService.Services;
@@ -6,11 +7,13 @@ public class AuctionServiceHttpClient
 {
     private readonly HttpClient _httpClient;
     private readonly IConfiguration _config;
+    private readonly SearchDbContext _dbContext;
 
-    public AuctionServiceHttpClient(HttpClient httpClient, IConfiguration config)
+    public AuctionServiceHttpClient(HttpClient httpClient, IConfiguration config, SearchDbContext dbContext)
     {
         _httpClient = httpClient;
         _config = config;
+        _dbContext = dbContext;
     }
 
     public async Task<List<Item>> GetItemsForSearchDb()
@@ -19,6 +22,17 @@ public class AuctionServiceHttpClient
                             .Sort(x => x.Descending(x => x.UpdatedAt))
                             .Project(x => x.UpdatedAt.ToString())
                             .ExecuteFirstAsync();
+
+        return await _httpClient.GetFromJsonAsync<List<Item>>(_config["AuctionServiceUrl"] + "/api/auctions?date=" + lastUpdated);
+    }
+
+
+    public async Task<List<Item>> GetItemsForSearchDbPostgres()
+    {
+        var lastUpdated = await _dbContext.Items
+    .OrderByDescending(x => x.UpdatedAt)
+    .Select(x => x.UpdatedAt.ToString())
+    .FirstOrDefaultAsync();
 
         return await _httpClient.GetFromJsonAsync<List<Item>>(_config["AuctionServiceUrl"] + "/api/auctions?date=" + lastUpdated);
     }

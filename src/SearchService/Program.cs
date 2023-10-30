@@ -1,7 +1,9 @@
 using System.Net;
 using MassTransit;
+using Microsoft.EntityFrameworkCore;
 using Polly;
 using Polly.Extensions.Http;
+using SearchService;
 using SearchService.Consumers;
 using SearchService.Data;
 using SearchService.Services;
@@ -11,6 +13,11 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 
 builder.Services.AddControllers();
+builder.Services.AddDbContext<SearchDbContext>(opt =>
+{
+    opt.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"));
+});
+
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 builder.Services.AddHttpClient<AuctionServiceHttpClient>().AddPolicyHandler(GetPolicy());
 builder.Services.AddMassTransit(x =>
@@ -21,6 +28,12 @@ builder.Services.AddMassTransit(x =>
 
     x.UsingRabbitMq((context, cfg) =>
     {
+        cfg.Host(builder.Configuration["RabbitMq:Host"], "/", host =>
+        {
+            host.Username(builder.Configuration.GetValue("RabbitMq:Username", "guest"));
+            host.Password(builder.Configuration.GetValue("RabbitMq:Password", "guest"));
+        });
+
         cfg.ReceiveEndpoint("search-auction-created", e =>
         {
             e.UseMessageRetry(r => r.Interval(5, 5));
@@ -35,7 +48,7 @@ var app = builder.Build();
 
 // Configure the HTTP request pipeline.
 
-app.UseHttpsRedirection();
+// app.UseHttpsRedirection();
 
 app.UseAuthorization();
 
@@ -45,7 +58,14 @@ app.Lifetime.ApplicationStarted.Register(async () =>
 {
     try
     {
-        await DbInitiazer.InitDb(app);
+        if (bool.Parse(builder.Configuration["UseMongoDb"]))
+        {
+            await DbInitiazer.InitDb(app);
+        }
+        else
+        {
+            await DbInitiazer.InitDbPostgress(app);
+        }
     }
     catch (System.Exception e)
     {
