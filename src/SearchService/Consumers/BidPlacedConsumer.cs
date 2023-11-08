@@ -22,7 +22,7 @@ public class BidPlacedConsumer : IConsumer<BidPlaced>
         {
             var auction = await DB.Find<Item>().OneAsync(context.Message.AuctionId);
 
-            if (context.Message.BidStatus.Contains("Accepeted") && context.Message.Amount > auction.CurrentHighBid)
+            if (context.Message.BidStatus.Contains("Accepted") && context.Message.Amount > auction.CurrentHighBid)
             {
                 auction.CurrentHighBid = context.Message.Amount;
                 await auction.SaveAsync();
@@ -31,7 +31,7 @@ public class BidPlacedConsumer : IConsumer<BidPlaced>
         else
         {
             var auction = await _context.Items.FindAsync(context.Message.Id);
-            if (context.Message.BidStatus.Contains("Accepeted") && context.Message.Amount > auction.CurrentHighBid)
+            if (context.Message.BidStatus.Contains("Accepted") && context.Message.Amount > auction.CurrentHighBid)
             {
                 auction.CurrentHighBid = context.Message.Amount;
                 await _context.SaveChangesAsync();

@@ -1,5 +1,5 @@
-﻿namespace Contracts;
-public class BidPlaced
+﻿namespace BiddingService.DTOs;
+public class BidDto
 {
     public string Id { get; set; }
     public string AuctionId { get; set; }

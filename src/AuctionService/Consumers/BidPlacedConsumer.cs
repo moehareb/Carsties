@@ -2,7 +2,7 @@
 using Contracts;
 using MassTransit;
 
-namespace AuctionService;
+namespace AuctionService.Consumers;
 public class BidPlacedConsumer : IConsumer<BidPlaced>
 {
     private readonly AuctionDbContext _dbContext;
@@ -13,9 +13,9 @@ public class BidPlacedConsumer : IConsumer<BidPlaced>
     }
     public async Task Consume(ConsumeContext<BidPlaced> context)
     {
-        Console.WriteLine("--> Consuming Bid Placed");
+        Console.WriteLine("-->\n\n\n\n\n Consuming Bid Placed From Auction Service\n\n\n\n\n");
 
-        var auction = await _dbContext.Auctions.FindAsync(context.Message.AuctionId);
+        var auction = await _dbContext.Auctions.FindAsync(Guid.Parse(context.Message.AuctionId));
 
         if (auction.CurrentHighBid == null ||
          (context.Message.BidStatus.Contains("Accepted") && context.Message.Amount > auction.CurrentHighBid))
